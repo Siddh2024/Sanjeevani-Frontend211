@@ -28,6 +28,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [institutionId, setInstitutionId] = useState('');
+  const [role, setRole] = useState<'RESEARCHER' | 'TTO_OFFICER'>('RESEARCHER');
   const [showPassword, setShowPassword] = useState(false);
   
   const { mutate: register, isPending, error } = useRegister();
@@ -40,7 +41,7 @@ export default function RegisterPage() {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    register({ name, email, password, institutionId });
+    register({ name, email, password, institutionId: Number(institutionId), role });
   };
 
   return (
@@ -232,6 +233,39 @@ export default function RegisterPage() {
 
               <div className="w-full">
                 <label
+                  htmlFor="role"
+                  className="mb-1.5 block text-sm font-medium text-navy-700 dark:text-zinc-300"
+                >
+                  Your Role
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setRole('RESEARCHER')}
+                    className={`flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-semibold border transition-all cursor-pointer ${
+                      role === 'RESEARCHER'
+                        ? 'bg-emerald-600 border-emerald-600 text-white shadow-md shadow-emerald-500/10'
+                        : 'border-navy-100 dark:border-zinc-800 text-navy-600 dark:text-zinc-400 bg-white/40 dark:bg-zinc-900/40 hover:bg-white/60 dark:hover:bg-zinc-900/60'
+                    }`}
+                  >
+                    Researcher
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRole('TTO_OFFICER')}
+                    className={`flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-semibold border transition-all cursor-pointer ${
+                      role === 'TTO_OFFICER'
+                        ? 'bg-emerald-600 border-emerald-600 text-white shadow-md shadow-emerald-500/10'
+                        : 'border-navy-100 dark:border-zinc-800 text-navy-600 dark:text-zinc-400 bg-white/40 dark:bg-zinc-900/40 hover:bg-white/60 dark:hover:bg-zinc-900/60'
+                    }`}
+                  >
+                    TTO Officer
+                  </button>
+                </div>
+              </div>
+
+              <div className="w-full">
+                <label
                   htmlFor="institution"
                   className="mb-1.5 block text-sm font-medium text-navy-700 dark:text-zinc-300"
                 >
@@ -249,7 +283,7 @@ export default function RegisterPage() {
                   </option>
                   {institutions?.map((inst) => (
                     <option key={inst.id} value={inst.id} className="text-navy-950 dark:text-white dark:bg-zinc-900">
-                      {inst.name} — {inst.city}
+                      {inst.name} ({inst.type})
                     </option>
                   ))}
                 </select>

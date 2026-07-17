@@ -13,7 +13,7 @@ import { CountdownTimer } from '@/components/CountdownTimer';
 import { SkeletonLoader } from '@/components/SkeletonLoader';
 import { Button } from '@/components/ui/Button';
 import { dashboardApi } from '@/api/dashboard';
-import type { DashboardSummary, DisclosureWindow } from '@/types/models';
+import type { DashboardSummary, DisclosureWindow, PaginatedResponse } from '@/types/models';
 
 function MetricCard({
   icon: Icon,
@@ -75,7 +75,7 @@ export default function DashboardPage() {
       queryFn: dashboardApi.summary,
     });
 
-  const { data: windows } = useQuery<DisclosureWindow[]>({
+  const { data: windows } = useQuery<PaginatedResponse<DisclosureWindow>>({
     queryKey: ['disclosure-windows', 'CLOSING_SOON'],
     queryFn: () => dashboardApi.disclosureWindows('CLOSING_SOON'),
   });
@@ -150,14 +150,14 @@ export default function DashboardPage() {
           </div>
 
           <div className="space-y-3">
-            {windows?.length === 0 && (
+            {windows?.content?.length === 0 && (
               <GlassCard>
                 <p className="text-sm text-navy-400">
                   No disclosure windows closing soon.
                 </p>
               </GlassCard>
             )}
-            {windows?.map((dw) => (
+            {windows?.content?.map((dw) => (
               <DisclosureCard key={dw.id} window={dw} />
             ))}
             {!windows && <SkeletonLoader variant="card" count={2} />}
@@ -172,10 +172,10 @@ export default function DashboardPage() {
           <h2 className="mb-4 text-lg font-bold text-navy-800">
             Most Urgent
           </h2>
-          {windows && windows.length > 0 && (
+          {windows?.content && windows.content.length > 0 && (
             <CountdownTimer
-              deadline={windows[0]!.deadline}
-              daysRemaining={windows[0]!.daysRemaining}
+              deadline={windows.content[0]!.deadline}
+              daysRemaining={windows.content[0]!.daysRemaining}
               label="Section 31 Deadline"
             />
           )}

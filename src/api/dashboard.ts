@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { DashboardSummary, DisclosureWindow } from '@/types/models';
+import type { DashboardSummary, DisclosureWindow, PaginatedResponse } from '@/types/models';
 
 export const dashboardApi = {
   summary: () =>
@@ -7,7 +7,7 @@ export const dashboardApi = {
 
   disclosureWindows: (status?: string) =>
     apiClient
-      .get<DisclosureWindow[]>('/disclosure-windows', {
+      .get<PaginatedResponse<DisclosureWindow>>('/disclosure-windows', {
         params: status ? { status } : {},
       })
       .then((r) => r.data),

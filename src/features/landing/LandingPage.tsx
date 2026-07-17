@@ -13,11 +13,15 @@ import {
 import { Timeline } from '@/components/ui/Timeline';
 import { useDarkMode } from '@/hooks/useDarkMode';
 import { AtomVector, ResearchPaperVector, PatentPaperVector } from './components/HeroVectors';
+import { useAuthStore } from '@/lib/auth-store';
+import { useLogout } from '@/hooks/useAuth';
 
 export default function LandingPage() {
   const { isDark, toggle } = useDarkMode();
   const { pathname, hash } = useLocation();
   const [activeVector, setActiveVector] = useState(0);
+  const { isAuthenticated } = useAuthStore();
+  const logout = useLogout();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -97,18 +101,29 @@ export default function LandingPage() {
               )}
             </motion.button>
 
-            <Link
-              to="/login"
-              className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors px-3 py-1.5 rounded-full hover:bg-white/60 dark:hover:bg-white/5"
-            >
-              Log in
-            </Link>
-            
-            <Link to="/register">
-              <button className="text-xs font-semibold bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-4 py-2 rounded-full transition-all shadow-sm cursor-pointer">
-                Get Started
+            {isAuthenticated ? (
+              <button
+                onClick={logout}
+                className="text-xs font-semibold bg-red-50/50 dark:bg-red-950/20 text-red-500 border border-red-200/50 dark:border-red-900/50 hover:bg-red-500 hover:text-white px-4 py-2 rounded-full transition-all cursor-pointer"
+              >
+                Log out
               </button>
-            </Link>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors px-3 py-1.5 rounded-full hover:bg-white/60 dark:hover:bg-white/5"
+                >
+                  Log in
+                </Link>
+                
+                <Link to="/register">
+                  <button className="text-xs font-semibold bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-4 py-2 rounded-full transition-all shadow-sm cursor-pointer">
+                    Get Started
+                  </button>
+                </Link>
+              </>
+            )}
           </div>
         </header>
 

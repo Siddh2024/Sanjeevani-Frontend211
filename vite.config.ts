@@ -18,8 +18,13 @@ export default defineConfig({
     port: 6969,
     proxy: {
       '/api': {
-        target: process.env.VITE_API_BASE_URL || 'http://localhost:8080',
+        target: process.env.VITE_API_BASE_URL || 'http://localhost:8081',
         changeOrigin: true,
+        configure: (proxy, _options) => {
+          proxy.on('proxyReq', (proxyReq, _req, _res) => {
+            proxyReq.setHeader('Origin', 'http://localhost:8081');
+          });
+        },
       },
     },
   },

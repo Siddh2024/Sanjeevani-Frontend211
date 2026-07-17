@@ -1,16 +1,16 @@
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { 
-  FlaskConical, 
-  Eye, 
-  EyeOff, 
-  ArrowLeft, 
-  Sun, 
-  Moon, 
-  ShieldAlert, 
-  Zap, 
-  CheckCircle2 
+import {
+  FlaskConical,
+  Eye,
+  EyeOff,
+  ArrowLeft,
+  Sun,
+  Moon,
+  ShieldAlert,
+  Zap,
+  CheckCircle2
 } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/Button';
@@ -18,17 +18,43 @@ import { Input } from '@/components/ui/Input';
 import { useLogin } from '@/hooks/useAuth';
 import { useDarkMode } from '@/hooks/useDarkMode';
 import { MovingVectors } from '@/components/ui/MovingVectors';
+import { authApi } from '@/api/auth';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isBypassing, setIsBypassing] = useState(false);
   const { mutate: login, isPending, error } = useLogin();
   const { isDark, toggle } = useDarkMode();
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     login({ email, password });
+  };
+
+  const handleBypass = async () => {
+    setIsBypassing(true);
+    try {
+      // Register dev user (ignoring if they are already registered)
+      await authApi.register({
+        name: 'Dev User',
+        email: 'luffy@gmail.com',
+        password: 'bankai',
+        institutionId: 1, // IIT Bombay (ID 1 seeded in DB)
+        role: 'RESEARCHER',
+      });
+    } catch (err) {
+      // User is likely already registered
+    }
+
+    try {
+      login({ email: 'dev@anvesha.com', password: 'password123' });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsBypassing(false);
+    }
   };
 
   return (
@@ -65,7 +91,7 @@ export default function LoginPage() {
       </div>
 
       {/* Left side: Premium Scientific Graphics / App Preview */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, x: -40 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
@@ -147,7 +173,7 @@ export default function LoginPage() {
       </motion.div>
 
       {/* Right side: Login Form */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, x: 40 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
@@ -225,6 +251,23 @@ export default function LoginPage() {
                 className="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white shadow-lg shadow-emerald-500/20"
               >
                 Sign in to Dashboard
+              </Button>
+
+              <div className="relative flex py-1 items-center">
+                <div className="flex-grow border-t border-zinc-200 dark:border-zinc-800"></div>
+                <span className="flex-shrink mx-4 text-zinc-400 dark:text-zinc-500 text-xs uppercase font-medium">Or</span>
+                <div className="flex-grow border-t border-zinc-200 dark:border-zinc-800"></div>
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                loading={isBypassing}
+                onClick={handleBypass}
+                className="w-full border border-dashed border-zinc-300 dark:border-zinc-800 text-navy-600 dark:text-zinc-400 hover:bg-navy-50/50 dark:hover:bg-zinc-900/50 hover:text-navy-950 dark:hover:text-white cursor-pointer"
+              >
+                Developer Bypass Login
               </Button>
             </form>
           </GlassCard>

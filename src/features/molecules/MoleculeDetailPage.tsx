@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   ArrowLeft,
   FlaskConical,
@@ -18,6 +19,7 @@ import { CountdownTimer } from '@/components/CountdownTimer';
 import { MoleculeRenderer } from '@/components/MoleculeRenderer';
 import { NoveltyGauge } from '@/components/NoveltyGauge';
 import { SkeletonLoader } from '@/components/SkeletonLoader';
+import { Input } from '@/components/ui/Input';
 import {
   useDisclosureWindows,
   useStartDisclosureWindow,
@@ -60,9 +62,23 @@ export default function MoleculeDetailPage() {
 
   const { data: windows } = useDisclosureWindows();
 
-  const disclosureWindow = windows?.find((w) => w.moleculeId === id);
+  const disclosureWindow = windows?.content?.find((w) => w.moleculeId === id);
   const { mutate: startWindow, isPending: startingWindow } =
     useStartDisclosureWindow();
+
+  const [showPatentModal, setShowPatentModal] = useState(false);
+  const [patentOffice, setPatentOffice] = useState('Indian Patent Office');
+  const [filingDate, setFilingDate] = useState(new Date().toISOString().split('T')[0]);
+  const [appNumber, setAppNumber] = useState('');
+
+  const { mutate: recordFiling, isPending: filingPatent } = useMutation({
+    mutationFn: (req: { patentOffice: string; filingDate?: string; applicationNumber?: string }) =>
+      moleculesApi.filePatent(id!, req),
+    onSuccess: () => {
+      setShowPatentModal(false);
+      alert('Provisional patent filed successfully!');
+    },
+  });
 
   if (isLoading) {
     return (
@@ -258,12 +274,86 @@ export default function MoleculeDetailPage() {
           </Button>
         </Link>
         {molecule.noveltyScore >= 0.8 && (
-          <Button variant="primary">
+          <Button variant="primary" onClick={() => setShowPatentModal(true)}>
             <AlertTriangle className="h-4 w-4" />
             File Provisional Patent
           </Button>
         )}
       </motion.div>
+
+      {/* File Patent Modal */}
+      {showPatentModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/65 backdrop-blur-sm p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="w-full max-w-md"
+          >
+            <GlassCard variant="strong">
+              <h3 className="text-lg font-bold text-navy-900 dark:text-white mb-4">
+                Record Patent Filing
+              </h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="modal-patentOffice" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-navy-400">
+                    Patent Office
+                  </label>
+                  <select
+                    id="modal-patentOffice"
+                    value={patentOffice}
+                    onChange={(e) => setPatentOffice(e.target.value)}
+                    className="glass w-full rounded-xl px-4 py-2.5 text-sm text-navy-900 dark:text-white bg-white/40 dark:bg-zinc-900/40 border border-navy-100 dark:border-zinc-800 focus:border-saffron-500 focus:outline-none focus:ring-2 focus:ring-saffron-100 cursor-pointer"
+                  >
+                    <option value="Indian Patent Office" className="text-navy-950 dark:text-white dark:bg-zinc-900">Indian Patent Office (IPO)</option>
+                    <option value="USPTO" className="text-navy-950 dark:text-white dark:bg-zinc-900">USPTO (United States)</option>
+                    <option value="EPO" className="text-navy-950 dark:text-white dark:bg-zinc-900">EPO (Europe)</option>
+                    <option value="WIPO" className="text-navy-950 dark:text-white dark:bg-zinc-900">WIPO (PCT)</option>
+                  </select>
+                </div>
+
+                <Input
+                  id="modal-filingDate"
+                  label="Filing Date"
+                  type="date"
+                  value={filingDate}
+                  onChange={(e) => setFilingDate(e.target.value)}
+                  className="bg-white/40 dark:bg-zinc-900/40 border border-navy-100 dark:border-zinc-800 text-navy-900 dark:text-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                />
+
+                <Input
+                  id="modal-appNumber"
+                  label="Application Number"
+                  type="text"
+                  placeholder="e.g. TEMP/2026/123456"
+                  value={appNumber}
+                  onChange={(e) => setAppNumber(e.target.value)}
+                  className="bg-white/40 dark:bg-zinc-900/40 border border-navy-100 dark:border-zinc-800 text-navy-900 dark:text-white placeholder:text-navy-300 dark:placeholder:text-zinc-600 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                />
+              </div>
+
+              <div className="mt-6 flex justify-end gap-3">
+                <Button variant="secondary" onClick={() => setShowPatentModal(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  loading={filingPatent}
+                  onClick={() =>
+                    recordFiling({
+                      patentOffice,
+                      filingDate,
+                      applicationNumber: appNumber || undefined,
+                    })
+                  }
+                >
+                  Record Filing
+                </Button>
+              </div>
+            </GlassCard>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

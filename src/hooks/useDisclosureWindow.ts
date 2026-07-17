@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { dashboardApi } from '@/api/dashboard';
 import { moleculesApi } from '@/api/molecules';
-import type { DisclosureWindow } from '@/types/models';
+import type { DisclosureWindow, PaginatedResponse } from '@/types/models';
 
 export function useDisclosureWindows(status?: string) {
-  return useQuery<DisclosureWindow[]>({
+  return useQuery<PaginatedResponse<DisclosureWindow>>({
     queryKey: ['disclosure-windows', status],
     queryFn: () => dashboardApi.disclosureWindows(status),
   });

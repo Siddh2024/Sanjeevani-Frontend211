@@ -32,7 +32,7 @@ function PaperRow({ paper }: { paper: Paper }) {
             {paper.title}
           </p>
           <p className="text-xs text-navy-400">
-            {paper.authors?.join(', ')} &middot; {formatDate(paper.uploadedAt)}
+            {paper.authors} &middot; {formatDate(paper.uploadedAt)}
           </p>
         </div>
         <div className="hidden items-center gap-4 text-xs text-navy-400 sm:flex">

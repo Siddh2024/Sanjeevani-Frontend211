@@ -1,10 +1,10 @@
 import { apiClient } from './client';
-import type { Alert } from '@/types/models';
+import type { Alert, PaginatedResponse } from '@/types/models';
 
 export const alertsApi = {
   list: (unread?: boolean) =>
     apiClient
-      .get<Alert[]>('/alerts', { params: unread != null ? { unread } : {} })
+      .get<PaginatedResponse<Alert>>('/alerts', { params: unread != null ? { unread } : {} })
       .then((r) => r.data),
 
   markRead: (id: string) =>

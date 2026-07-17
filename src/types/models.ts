@@ -7,16 +7,16 @@ export interface User {
 }
 
 export interface Institution {
-  id: string;
+  id: number;
   name: string;
-  code: string;
-  city: string;
+  type: string;
+  ttoContactEmail?: string;
 }
 
 export interface Paper {
   id: string;
   title: string;
-  authors: string[];
+  authors: string;
   journal?: string;
   doi?: string;
   status: 'PROCESSING' | 'COMPLETED' | 'FAILED';

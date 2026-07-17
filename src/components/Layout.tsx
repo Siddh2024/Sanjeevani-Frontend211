@@ -3,10 +3,14 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { SkeletonLoader } from './SkeletonLoader';
 import { FlaskConical, Sun, Moon } from 'lucide-react';
 import { useDarkMode } from '@/hooks/useDarkMode';
+import { useLogout } from '@/hooks/useAuth';
+import { useAuthStore } from '@/lib/auth-store';
 
 export function Layout() {
   const { isDark, toggle } = useDarkMode();
   const location = useLocation();
+  const logout = useLogout();
+  const { isAuthenticated } = useAuthStore();
 
   const navLinks = [
     { label: 'Dashboard', href: '/dashboard' },
@@ -46,17 +50,28 @@ export function Layout() {
             ))}
           </nav>
 
-          <button
-            onClick={toggle}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200/50 dark:border-zinc-800/50 bg-white/60 dark:bg-white/5 backdrop-blur-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all cursor-pointer"
-            aria-label="Toggle theme"
-          >
-            {isDark ? (
-              <Sun className="h-4 w-4 text-saffron-400" />
-            ) : (
-              <Moon className="h-4 w-4 text-zinc-650" />
+          <div className="flex items-center gap-3">
+            <button
+              onClick={toggle}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200/50 dark:border-zinc-800/50 bg-white/60 dark:bg-white/5 backdrop-blur-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all cursor-pointer"
+              aria-label="Toggle theme"
+            >
+              {isDark ? (
+                <Sun className="h-4 w-4 text-saffron-400" />
+              ) : (
+                <Moon className="h-4 w-4 text-zinc-650" />
+              )}
+            </button>
+
+            {isAuthenticated && (
+              <button
+                onClick={logout}
+                className="text-xs font-semibold bg-red-50/50 dark:bg-red-950/20 text-red-500 border border-red-200/50 dark:border-red-900/50 hover:bg-red-500 hover:text-white px-4 py-2 rounded-full transition-all cursor-pointer"
+              >
+                Log out
+              </button>
             )}
-          </button>
+          </div>
         </header>
       )}
 

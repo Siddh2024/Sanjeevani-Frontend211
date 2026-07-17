@@ -12,11 +12,48 @@ export interface PapersQueryParams {
 export const papersApi = {
   list: (params?: PapersQueryParams) =>
     apiClient
-      .get<PaginatedResponse<Paper>>('/papers', { params })
-      .then((r) => r.data),
+      .get<PaginatedResponse<any>>('/papers', { params })
+      .then((r) => {
+        const mappedContent = (r.data.content || []).map((p: any) => ({
+          ...p,
+          id: String(p.id),
+          uploadedAt: p.createdAt,
+          moleculeCount: 0,
+          novelMoleculeCount: 0,
+        }));
+        return {
+          ...r.data,
+          content: mappedContent,
+        } as PaginatedResponse<Paper>;
+      }),
 
   getById: (id: string) =>
-    apiClient.get<Paper>(`/papers/${id}`).then((r) => r.data),
+    apiClient.get<any>(`/papers/${id}`).then((r) => {
+      const data = r.data;
+      return {
+        id: String(data.id),
+        title: data.title,
+        authors: data.authors,
+        status: data.status,
+        uploadedAt: data.createdAt,
+        molecules: (data.molecules || []).map((m: any) => {
+          let status = 'UNCERTAIN';
+          if (m.latestScan) {
+            status = m.latestScan.isNovel ? 'NOVEL' : 'KNOWN';
+          }
+          return {
+            id: String(m.id),
+            smiles: m.smiles,
+            iupacName: m.iupacName || m.extractedNameRaw,
+            confidenceScore: m.extractionConfidence != null ? Number(m.extractionConfidence) : 0,
+            status: status,
+            noveltyScore: m.latestScan ? Number(m.latestScan.noveltyScore) : 0,
+            tanimotoSimilarity: m.latestScan ? Number(m.latestScan.tanimotoSimilarity) : 0,
+            closestKnownMatch: m.latestScan ? m.latestScan.closestMatchId : undefined,
+          };
+        }),
+      } as any;
+    }),
 
   upload: (formData: FormData) =>
     apiClient

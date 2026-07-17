@@ -9,7 +9,8 @@ export interface RegisterRequest {
   email: string;
   password: string;
   name: string;
-  institutionId: string;
+  institutionId: number;
+  role: 'RESEARCHER' | 'TTO_OFFICER';
 }
 
 export interface AuthResponse {

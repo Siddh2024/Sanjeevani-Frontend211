@@ -14,7 +14,7 @@ export function useLogin() {
     onSuccess: (response) => {
       setAuth(response);
       queryClient.invalidateQueries();
-      navigate('/dashboard', { replace: true });
+      navigate('/', { replace: true });
     },
   });
 }
@@ -27,7 +27,7 @@ export function useRegister() {
     mutationFn: (data: RegisterRequest) => authApi.register(data),
     onSuccess: (response) => {
       setAuth(response);
-      navigate('/dashboard', { replace: true });
+      navigate('/', { replace: true });
     },
   });
 }

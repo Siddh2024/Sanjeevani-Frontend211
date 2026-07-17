@@ -10,18 +10,6 @@ import { papersApi } from '@/api/papers';
 import { formatDate } from '@/lib/utils';
 import type { Paper, Molecule } from '@/types/models';
 
-// Simulated molecules attached to a paper
-// In production, this data comes from GET /api/papers/{id}/molecules
-function usePaperMolecules(paperId: string) {
-  return useQuery<Molecule[]>({
-    queryKey: ['paper-molecules', paperId],
-    queryFn: () =>
-      fetch(`/api/papers/${paperId}/molecules`).then((r) => r.json()),
-    enabled: false, // placeholder — backend endpoint TBD
-    placeholderData: [],
-  });
-}
-
 const moleculeStatusVariant: Record<string, 'success' | 'warning' | 'danger'> = {
   NOVEL: 'success',
   UNCERTAIN: 'warning',
@@ -31,13 +19,13 @@ const moleculeStatusVariant: Record<string, 'success' | 'warning' | 'danger'> = 
 export default function PaperDetailPage() {
   const { id } = useParams<{ id: string }>();
 
-  const { data: paper, isLoading } = useQuery<Paper>({
+  const { data: paper, isLoading } = useQuery<Paper & { molecules: Molecule[] }>({
     queryKey: ['paper', id],
     queryFn: () => papersApi.getById(id!),
     enabled: !!id,
   });
 
-  const { data: molecules } = usePaperMolecules(id!);
+  const molecules = paper?.molecules;
 
   if (isLoading) {
     return (
@@ -87,7 +75,7 @@ export default function PaperDetailPage() {
                 {paper.title}
               </h1>
               <p className="mt-1 text-sm text-navy-500">
-                {paper.authors?.join(', ')}
+                {paper.authors}
               </p>
               <div className="mt-3 flex flex-wrap gap-3 text-xs text-navy-400">
                 {paper.journal && <span>{paper.journal}</span>}

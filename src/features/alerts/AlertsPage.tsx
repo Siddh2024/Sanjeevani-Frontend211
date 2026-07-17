@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { SkeletonLoader } from '@/components/SkeletonLoader';
 import { alertsApi } from '@/api/alerts';
 import { formatDate } from '@/lib/utils';
-import type { Alert } from '@/types/models';
+import type { Alert, PaginatedResponse } from '@/types/models';
 
 const alertIcon = {
   DISCLOSURE_URGENT: Clock,
@@ -88,7 +88,7 @@ export default function AlertsPage() {
   const [unreadOnly, setUnreadOnly] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: alerts, isLoading } = useQuery<Alert[]>({
+  const { data: alerts, isLoading } = useQuery<PaginatedResponse<Alert>>({
     queryKey: ['alerts', unreadOnly],
     queryFn: () => alertsApi.list(unreadOnly || undefined),
   });
@@ -100,7 +100,7 @@ export default function AlertsPage() {
     },
   });
 
-  const unreadCount = alerts?.filter((a) => !a.read).length ?? 0;
+  const unreadCount = alerts?.content?.filter((a) => !a.read).length ?? 0;
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-6 md:p-10">
@@ -133,12 +133,12 @@ export default function AlertsPage() {
         {isLoading && <SkeletonLoader variant="card" count={5} />}
 
         <AnimatePresence mode="popLayout">
-          {alerts?.map((alert) => (
+          {alerts?.content?.map((alert) => (
             <AlertRow key={alert.id} alert={alert} onMarkRead={markRead} />
           ))}
         </AnimatePresence>
 
-        {alerts?.length === 0 && (
+        {alerts?.content?.length === 0 && (
           <GlassCard className="py-12 text-center">
             <Bell className="mx-auto mb-3 h-10 w-10 text-navy-300" />
             <p className="text-sm font-medium text-navy-500">
